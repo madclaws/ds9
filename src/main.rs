@@ -48,8 +48,5 @@ async fn main() -> Result<()> {
             println!("Commands are wrong")
         }
     }
-    println!("shutting down the node");
-    router.shutdown().await?;
-
     Ok(())
 }
