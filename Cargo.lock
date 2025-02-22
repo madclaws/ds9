@@ -711,8 +711,13 @@ name = "ds9"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "data-encoding",
  "iroh",
  "iroh-blobs",
+ "iroh-gossip",
+ "rand 0.9.0",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 
@@ -906,6 +911,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
 
 [[package]]
+name = "fixedbitset"
+version = "0.5.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d674e81391d1e1ab681a28d99df07927c6d4aa5b027d7da16ba32d1d21ecd99"
+
+[[package]]
 name = "flume"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -973,6 +984,21 @@ checksum = "2dff15bf788c671c1934e366d07e30c1814a8ef514e1af724a602e8a2fbe1b10"
 dependencies = [
  "futures-core",
  "futures-sink",
+]
+
+[[package]]
+name = "futures-concurrency"
+version = "7.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eb68017df91f2e477ed4bea586c59eaecaa47ed885a770d0444e21e62572cd2"
+dependencies = [
+ "fixedbitset",
+ "futures-buffered",
+ "futures-core",
+ "futures-lite",
+ "pin-project",
+ "slab",
+ "smallvec",
 ]
 
 [[package]]
@@ -1843,6 +1869,37 @@ dependencies = [
  "tracing-futures",
  "tracing-test",
  "walkdir",
+]
+
+[[package]]
+name = "iroh-gossip"
+version = "0.32.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3ea3b0c1ba4868fa65039839881b33826cd0546177fd55c77e9058fb13890c9"
+dependencies = [
+ "anyhow",
+ "async-channel",
+ "bytes",
+ "derive_more",
+ "ed25519-dalek",
+ "futures-concurrency",
+ "futures-lite",
+ "futures-util",
+ "hex",
+ "indexmap",
+ "iroh",
+ "iroh-blake3",
+ "iroh-metrics",
+ "postcard",
+ "rand 0.8.5",
+ "rand_core 0.6.4",
+ "serde",
+ "serde-error",
+ "thiserror 2.0.11",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "tracing-test",
 ]
 
 [[package]]

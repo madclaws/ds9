@@ -1,5 +1,5 @@
 use anyhow::Result;
-use iroh::{protocol::Router, Endpoint};
+use iroh::{protocol::Router, Endpoint, NodeId, PublicKey};
 use iroh_blobs::{
     net_protocol::Blobs,
     rpc::client::blobs::WrapOption,
@@ -7,15 +7,35 @@ use iroh_blobs::{
     ticket::BlobTicket,
     util::SetTagOption,
 };
-use std::path::PathBuf;
+use serde::{Deserialize, Serialize};
+use std::{any, path::PathBuf, thread::spawn, u8};
+use iroh_gossip::{net::Gossip, proto::TopicId};
+// This should handle the file and directory
+// fn import(path: PathBuf) {
+
+// }
+
+#[derive(Debug, Deserialize, Serialize)]
+enum Message {
+    AboutMe {from: NodeId, name: String},
+    Message {from: NodeId, text: String}
+}
+
+impl Message {
+    fn from_bytes(bytes: &[u8]) -> Result<Self>{
+        serde_json::from_slice(bytes).map_err(Into::into)
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let endpoint = Endpoint::builder().discovery_n0().bind().await?;
 
     let blobs = Blobs::memory().build(&endpoint);
-
+    let gossip = Gossip::builder().spawn(endpoint.clone()).await?;
     let router = Router::builder(endpoint)
         .accept(iroh_blobs::ALPN, blobs.clone())
+        .accept(iroh_gossip::ALPN, gossip.clone())
         .spawn()
         .await?;
 
@@ -26,8 +46,8 @@ async fn main() -> Result<()> {
     let args_ref: Vec<&str> = args.iter().map(String::as_str).collect();
 
     match args_ref.as_slice() {
-        ["send", filename] => {
-            let path: PathBuf = filename.parse()?;
+        ["send", path] => {
+            let path: PathBuf = path.parse()?;
             let abs_path = std::path::absolute(path.clone())?;
 
             println!("Blaking it");
@@ -54,8 +74,8 @@ async fn main() -> Result<()> {
             );
             tokio::signal::ctrl_c().await?;
         }
-        ["receive", ticket, filename] => {
-            let abs_path: PathBuf = std::path::absolute(filename.parse::<PathBuf>()?.clone())?;
+        ["receive", ticket, path] => {
+            let abs_path: PathBuf = std::path::absolute(path.parse::<PathBuf>()?.clone())?;
             let ticket: BlobTicket = ticket.parse()?;
 
             println!("Starting download");
@@ -82,6 +102,17 @@ async fn main() -> Result<()> {
                 .await?;
 
             println!("Finished download.");
+        }
+        ["comms"] => {
+            println!("In comms mode");
+            let topic_id = TopicId::from_bytes(rand::random());
+            let node_ids: Vec<PublicKey> = vec![];
+
+            let topic = gossip.subscribe(topic_id, node_ids)?;
+            
+            let (sender, _receiver) = topic.split();
+            
+            sender.broadcast("sup".into()).await?
         }
         _ => {
             println!("Commands are wrong")
