@@ -711,14 +711,16 @@ name = "ds9"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "data-encoding",
+ "futures-lite",
  "iroh",
  "iroh-blobs",
  "iroh-gossip",
+ "num_cpus",
  "rand 0.9.0",
  "serde",
  "serde_json",
  "tokio",
+ "walkdir",
 ]
 
 [[package]]
